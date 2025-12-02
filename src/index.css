@@ -1,66 +1,480 @@
 /* ============================================
-   ESTILOS GENERALES
+   RESET BÁSICO
    ============================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+   PALETA Y BASE
+   ============================================ */
+:root {
+  --bg-body: #020617;
+  --bg-shell: rgba(15, 23, 42, 0.96);
+  --bg-sidebar: rgba(15, 23, 42, 0.94);
+  --bg-card: rgba(15, 23, 42, 0.98);
+  --border-subtle: rgba(148, 163, 184, 0.3);
+
+  --accent: #38bdf8;
+  --accent-strong: #0ea5e9;
+  --accent-soft: rgba(56, 189, 248, 0.15);
+
+  --fg-primary: #e5e7eb;
+  --fg-secondary: #9ca3af;
+  --fg-muted: #6b7280;
+
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --shadow-soft: 0 22px 60px rgba(15, 23, 42, 0.85);
+}
 
 body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #ffffff;
-  color: #1f2937;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  background:
+    radial-gradient(circle at top left, #0f172a 0, transparent 55%),
+    radial-gradient(circle at bottom right, #22d3ee 0, transparent 60%),
+    var(--bg-body);
+  color: var(--fg-primary);
 }
 
-/* Contenedor general */
-.app-with-sidebar {
+/* ============================================
+   CONTENEDOR PRINCIPAL + LAYOUT
+   ============================================ */
+
+.app-root {
+  min-height: 100vh;
   display: flex;
-  gap: 20px;
-  padding: 20px;
+  justify-content: center;
+  align-items: stretch;
+  padding: 24px;
 }
 
+.app-with-sidebar {
+  width: 100%;
+  max-width: 1120px;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 18px;
+  background: var(--bg-shell);
+  border-radius: 26px;
+  padding: 18px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Responsive */
+@media (max-width: 840px) {
+  .app-root {
+    padding: 12px;
+  }
+
+  .app-with-sidebar {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* ============================================
    SIDEBAR
    ============================================ */
 
 .sidebar {
-  min-width: 180px;
-  background: #f3f4f6;
-  border-radius: 12px;
+  background: var(--bg-sidebar);
+  border-radius: 18px;
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(22px);
 }
 
 .sidebar-header {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  margin-bottom: 10px;
-  color: #111827;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sidebar-header::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: radial-gradient(circle, #22c55e 0, #16a34a 45%, #15803d 100%);
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.9);
 }
 
 .sidebar button {
   background: transparent;
   border: none;
-  padding: 10px 8px;
-  border-radius: 8px;
+  padding: 9px 10px;
+  border-radius: 10px;
   text-align: left;
   font-size: 0.9rem;
   cursor: pointer;
-  color: #1f2937;
-  transition: background 0.15s ease;
+  color: var(--fg-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    transform 0.08s ease;
+}
+
+.sidebar button::before {
+  content: '•';
+  font-size: 0.7rem;
+  opacity: 0.5;
 }
 
 .sidebar button:hover {
-  background: #e5e7eb;
+  background: rgba(30, 64, 175, 0.6);
+  color: var(--fg-primary);
+  transform: translateX(2px);
 }
 
 .sidebar button.active {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6);
+}
+
+.sidebar button.active::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent-strong);
+}
+
+/* ============================================
+   CONTENIDO PRINCIPAL / PÁGINAS
+   ============================================ */
+
+.app-content {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-title::after {
+  content: '';
+  width: 46px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0.7;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+}
+
+.page-root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Tarjetas de sección */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 14px 14px 12px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.75);
+}
+
+.section-title {
+  margin: 0 0 4px;
+  font-weight: 600;
+  font-size: 1.02rem;
+}
+
+.section-subtitle {
+  margin: 0 0 6px;
+  color: var(--fg-muted);
+  font-size: 0.82rem;
+}
+
+.placeholder-text {
+  color: var(--fg-secondary);
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+/* Grid simple para stats del dashboard */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat-pill {
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-pill strong {
   font-weight: 600;
 }
 
+@media (max-width: 720px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* ============================================
-   CONTENIDO PRINCIPAL
+   TABLAS (Finanzas / Actividades)
    ============================================ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+thead th {
+  background: rgba(15, 23, 42, 0.95);
+  color: var(--fg-secondary);
+  text-align: left;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.5);
+}
+
+tbody td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.9);
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(15, 23, 42, 0.7);
+}
+
+tbody tr:hover {
+  background: rgba(15, 118, 185, 0.35);
+}
+
+/* ============================================
+   LISTA DE OBJETIVOS
+   ============================================ */
+
+.objectives-page ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.objectives-page li {
+  margin: 0;
+}
+
+/* ============================================
+   CALENDARIO (mantiene lógica original)
+   ============================================ */
+
+.calendar-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.month-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.month-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--fg-secondary);
+}
+
+.btn-ghost {
+  background: rgba(30, 64, 175, 0.6);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-primary);
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(37, 99, 235, 0.9);
+}
+
+.btn-ghost:active {
+  transform: scale(0.97);
+}
+
+.calendar-card {
+  margin-top: 4px;
+}
+
+/* cabecera de días */
+.weekday-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--fg-muted);
+}
+
+.weekday-cell {
+  text-align: center;
+}
+
+/* grilla calendario */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.day-cell {
+  min-height: 100px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(51, 65, 85, 0.9);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    transform 0.06s ease;
+}
+
+.day-cell.outside-month {
+  background: rgba(15, 23, 42, 0.7);
+  opacity: 0.6;
+}
+
+.day-cell.today {
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.8);
+}
+
+.day-cell:hover {
+  background: rgba(30, 64, 175, 0.55);
+  border-color: rgba(129, 140, 248, 0.9);
+  transform: translateY(-1px);
+}
+
+.day-cell-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.day-number {
+  font-size: 0.9rem;
+}
+
+.day-saldo {
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.day-saldo.positive {
+  color: #22c55e;
+}
+
+.day-saldo.negative {
+  color: #f97373;
+}
+
+.day-content {
+  font-size: 0.7rem;
+  color: var(--fg-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+  overflow: hidden;
+}
+
+.movement-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.movement-kind {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+
+.movement-kind.ingreso {
+  background: rgba(22, 163, 74, 0.2);
+  color: #4ade80;
+}
+
+.movement-kind.gasto {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fb7185;
+}
+
+.movement-amount.ingreso {
+  color: #4ade80;
+}
+
+.movement-amount.gasto {
+  color: #fb7185;
+}
+
+.movement-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

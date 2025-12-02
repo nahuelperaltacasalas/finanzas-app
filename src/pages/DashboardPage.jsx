@@ -27,17 +27,29 @@ function DashboardPage() {
   )
   const mainObjective = objectivesActive[0] || sampleObjectives[0]
 
+  let mainProgress = 0
+  if (mainObjective && mainObjective.targetValue > 0) {
+    mainProgress = Math.min(
+      100,
+      Math.round(
+        (mainObjective.currentValue / mainObjective.targetValue) * 100,
+      ),
+    )
+  }
+
   const activitiesToday = sampleActivities.filter((a) => a.date === today)
   const lastActivity = [...sampleActivities]
     .filter((a) => a.status === 'HECHA')
     .sort((a, b) => (a.date < b.date ? 1 : -1))[0]
 
   return (
-    <div className="dashboard-page" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div className="page-root dashboard-page">
       <h1 className="page-title">Dashboard</h1>
-      <p className="page-subtitle">Resumen simple de tu situación actual (datos de ejemplo).</p>
+      <p className="page-subtitle">
+        Resumen simple de tu situación actual (datos de ejemplo).
+      </p>
 
-      <section className="dashboard-section">
+      <section className="card">
         <h2 className="section-title">Hoy</h2>
         <p>
           Fecha: <strong>{today}</strong>
@@ -47,40 +59,51 @@ function DashboardPage() {
             Actividades de hoy: <strong>{activitiesToday.length}</strong>
           </p>
         ) : (
-          <p>No tienes actividades registradas para hoy.</p>
+          <p className="placeholder-text">
+            No tienes actividades registradas para hoy.
+          </p>
         )}
       </section>
 
-      <section className="dashboard-section">
+      <section className="card">
         <h2 className="section-title">Finanzas del mes</h2>
-        <p>
-          Ingresos: <strong>${totalIncome.toFixed(2)}</strong>
-        </p>
-        <p>
-          Gastos: <strong>${totalExpense.toFixed(2)}</strong>
-        </p>
-        <p>
-          Balance: <strong>${monthBalance.toFixed(2)}</strong>
-        </p>
-        <div style={{ marginTop: '8px' }}>
-          <p className="section-subtitle">Próximos movimientos (planificados):</p>
-          {nextMovements.length > 0 ? (
-            <ul>
-              {nextMovements.map((m) => (
-                <li key={m.id}>
-                  {m.date} — {m.kind === 'INGRESO' ? 'Ingreso' : 'Gasto'} — $
-                  {m.amount.toFixed(2)} ({m.sourceOrReason})
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="placeholder-text">No hay próximos movimientos planificados.</p>
-          )}
+
+        <div className="stats-grid" style={{ marginBottom: '8px' }}>
+          <div className="stat-pill">
+            <span>Ingresos</span>
+            <strong>${totalIncome.toFixed(2)}</strong>
+          </div>
+          <div className="stat-pill">
+            <span>Gastos</span>
+            <strong>${totalExpense.toFixed(2)}</strong>
+          </div>
+          <div className="stat-pill">
+            <span>Balance</span>
+            <strong>${monthBalance.toFixed(2)}</strong>
+          </div>
         </div>
+
+        <p className="section-subtitle">
+          Próximos movimientos (planificados):
+        </p>
+        {nextMovements.length > 0 ? (
+          <ul>
+            {nextMovements.map((m) => (
+              <li key={m.id}>
+                {m.date} — {m.kind === 'INGRESO' ? 'Ingreso' : 'Gasto'} — $
+                {m.amount.toFixed(2)} ({m.sourceOrReason})
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="placeholder-text">
+            No hay próximos movimientos planificados.
+          </p>
+        )}
       </section>
 
       {mainObjective && (
-        <section className="dashboard-section">
+        <section className="card">
           <h2 className="section-title">Objetivo principal</h2>
           <p>
             <strong>{mainObjective.name}</strong>
@@ -92,17 +115,14 @@ function DashboardPage() {
           </p>
           {mainObjective.targetValue > 0 && (
             <p>
-              Progreso: {mainObjective.currentValue} / {mainObjective.targetValue} (
-              {Math.round(
-                (mainObjective.currentValue / mainObjective.targetValue) * 100,
-              )}
-              %)
+              Progreso: {mainObjective.currentValue} /{' '}
+              {mainObjective.targetValue} ({mainProgress}%)
             </p>
           )}
         </section>
       )}
 
-      <section className="dashboard-section">
+      <section className="card">
         <h2 className="section-title">Acción</h2>
         {activitiesToday.length > 0 ? (
           <>
@@ -116,11 +136,15 @@ function DashboardPage() {
             </ul>
           </>
         ) : (
-          <p className="placeholder-text">No tienes actividades cargadas para hoy.</p>
+          <p className="placeholder-text">
+            No tienes actividades cargadas para hoy.
+          </p>
         )}
+
         {lastActivity && (
           <p style={{ marginTop: '8px' }}>
-            Última actividad realizada: <strong>{lastActivity.name}</strong> ({lastActivity.date})
+            Última actividad realizada:{' '}
+            <strong>{lastActivity.name}</strong> ({lastActivity.date})
           </p>
         )}
       </section>

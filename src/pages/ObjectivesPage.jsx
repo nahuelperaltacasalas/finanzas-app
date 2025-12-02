@@ -2,21 +2,14 @@ import { sampleObjectives } from '../lib/sampleData.js'
 
 function ObjectivesPage() {
   return (
-    <div className="objectives-page" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div className="page-root objectives-page">
       <h1 className="page-title">Objetivos</h1>
-      <p className="page-subtitle">Tus metas y objetivos definidos (datos de ejemplo).</p>
+      <p className="page-subtitle">
+        Tus metas y objetivos definidos (datos de ejemplo).
+      </p>
 
       {sampleObjectives.length > 0 ? (
-        <ul
-          className="objectives-list"
-          style={{
-            listStyle: 'none',
-            paddingLeft: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-          }}
-        >
+        <ul>
           {sampleObjectives.map((obj) => {
             let progress = 0
             if (obj.targetValue > 0) {
@@ -27,15 +20,7 @@ function ObjectivesPage() {
             }
 
             return (
-              <li
-                key={obj.id}
-                style={{
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '12px',
-                  padding: '12px',
-                  background: '#f9fafb',
-                }}
-              >
+              <li key={obj.id} className="card">
                 <h3 style={{ marginBottom: '4px' }}>{obj.name}</h3>
                 <p style={{ marginBottom: '4px' }}>
                   Área: <strong>{obj.area}</strong> | Estado:{' '}
@@ -59,7 +44,7 @@ function ObjectivesPage() {
           })}
         </ul>
       ) : (
-        <p>No tienes objetivos definidos.</p>
+        <p className="placeholder-text">No tienes objetivos definidos.</p>
       )}
     </div>
   )

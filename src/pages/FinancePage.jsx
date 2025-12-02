@@ -8,11 +8,13 @@ function FinancePage() {
   const totalExpense = expenses.reduce((acc, m) => acc + m.amount, 0)
 
   return (
-    <div className="finance-page" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div className="page-root finance-page">
       <h1 className="page-title">Finanzas</h1>
-      <p className="page-subtitle">Listado de ingresos y gastos (datos de ejemplo).</p>
+      <p className="page-subtitle">
+        Listado de ingresos y gastos (datos de ejemplo).
+      </p>
 
-      <section className="finance-section">
+      <section className="card">
         <h2 className="section-title">Resumen</h2>
         <p>
           Total de ingresos: <strong>${totalIncome.toFixed(2)}</strong>
@@ -22,7 +24,7 @@ function FinancePage() {
         </p>
       </section>
 
-      <section className="finance-section">
+      <section className="card">
         <h2 className="section-title">Ingresos</h2>
         {incomes.length > 0 ? (
           <table className="finance-table">
@@ -46,11 +48,11 @@ function FinancePage() {
             </tbody>
           </table>
         ) : (
-          <p>No hay ingresos registrados.</p>
+          <p className="placeholder-text">No hay ingresos registrados.</p>
         )}
       </section>
 
-      <section className="finance-section">
+      <section className="card">
         <h2 className="section-title">Gastos</h2>
         {expenses.length > 0 ? (
           <table className="finance-table">
@@ -74,7 +76,7 @@ function FinancePage() {
             </tbody>
           </table>
         ) : (
-          <p>No hay gastos registrados.</p>
+          <p className="placeholder-text">No hay gastos registrados.</p>
         )}
       </section>
     </div>

@@ -1,14 +1,72 @@
+// Movimientos de ejemplo (ingresos y gastos)
 export const sampleMovements = [
-  { id: 'm1', kind: 'GASTO', date: '2025-11-01', amount: 12.5, sourceOrReason: 'Café y snack', status: 'CONFIRMADO' },
-  { id: 'm2', kind: 'INGRESO', date: '2025-11-02', amount: 500, sourceOrReason: 'Trabajo freelance', status: 'CONFIRMADO' },
-  { id: 'm3', kind: 'GASTO', date: '2025-11-03', amount: 1200, sourceOrReason: 'Renta', status: 'CONFIRMADO' },
-  { id: 'm4', kind: 'GASTO', date: '2025-11-05', amount: 40, sourceOrReason: 'Supermercado', status: 'CONFIRMADO' },
-  { id: 'm5', kind: 'INGRESO', date: '2025-11-10', amount: 1500, sourceOrReason: 'Sueldo', status: 'CONFIRMADO' },
-  { id: 'm6', kind: 'GASTO', date: '2025-11-12', amount: 60, sourceOrReason: 'Transporte', status: 'CONFIRMADO' },
-  { id: 'm7', kind: 'GASTO', date: '2025-11-15', amount: 85, sourceOrReason: 'Cena afuera', status: 'CONFIRMADO' },
-  { id: 'm8', kind: 'INGRESO', date: '2025-11-25', amount: 300, sourceOrReason: 'Ingreso futuro', status: 'PLANIFICADO' },
+  {
+    id: 'm1',
+    kind: 'GASTO',
+    date: '2025-11-01',
+    amount: 12.5,
+    sourceOrReason: 'Café y snack',
+    status: 'CONFIRMADO',
+  },
+  {
+    id: 'm2',
+    kind: 'INGRESO',
+    date: '2025-11-02',
+    amount: 500,
+    sourceOrReason: 'Trabajo freelance',
+    status: 'CONFIRMADO',
+  },
+  {
+    id: 'm3',
+    kind: 'GASTO',
+    date: '2025-11-03',
+    amount: 1200,
+    sourceOrReason: 'Renta',
+    status: 'CONFIRMADO',
+  },
+  {
+    id: 'm4',
+    kind: 'GASTO',
+    date: '2025-11-05',
+    amount: 40,
+    sourceOrReason: 'Supermercado',
+    status: 'CONFIRMADO',
+  },
+  {
+    id: 'm5',
+    kind: 'INGRESO',
+    date: '2025-11-10',
+    amount: 1500,
+    sourceOrReason: 'Sueldo',
+    status: 'CONFIRMADO',
+  },
+  {
+    id: 'm6',
+    kind: 'GASTO',
+    date: '2025-11-12',
+    amount: 60,
+    sourceOrReason: 'Transporte',
+    status: 'CONFIRMADO',
+  },
+  {
+    id: 'm7',
+    kind: 'GASTO',
+    date: '2025-11-15',
+    amount: 85,
+    sourceOrReason: 'Cena afuera',
+    status: 'CONFIRMADO',
+  },
+  {
+    id: 'm8',
+    kind: 'INGRESO',
+    date: '2025-11-25',
+    amount: 300,
+    sourceOrReason: 'Ingreso futuro',
+    status: 'PLANIFICADO',
+  },
 ]
 
+// Objetivos de ejemplo
 export const sampleObjectives = [
   {
     id: 'obj1',
@@ -48,6 +106,7 @@ export const sampleObjectives = [
   },
 ]
 
+// Actividades de ejemplo
 export const sampleActivities = [
   {
     id: 'act1',
