@@ -1,86 +1,88 @@
-// Example movements for the Finanzas App calendar.
-// These are used to populate the calendar with sample incomes and expenses.
-// Each movement consists of a kind (INGRESO or GASTO), a date in
-// ISO format, an amount, a description, and a status.
-
-/**
- * @typedef {Object} Movement
- * @property {string} id Unique identifier for the movement
- * @property {"INGRESO" | "GASTO"} kind Type of movement
- * @property {string} date ISO formatted date (YYYY‑MM‑DD)
- * @property {number} amount Positive numeric value
- * @property {string} sourceOrReason Description of the movement
- * @property {"REAL" | "PLANIFICADO" | "AJUSTE"} status Status of the movement
- */
-
-/**
- * An array of sample movements to display in the calendar.
- * These include a mix of incomes and expenses, both actual and planned.
- * @type {Movement[]}
- */
 export const sampleMovements = [
+  { id: 'm1', kind: 'GASTO', date: '2025-11-01', amount: 12.5, sourceOrReason: 'Café y snack', status: 'CONFIRMADO' },
+  { id: 'm2', kind: 'INGRESO', date: '2025-11-02', amount: 500, sourceOrReason: 'Trabajo freelance', status: 'CONFIRMADO' },
+  { id: 'm3', kind: 'GASTO', date: '2025-11-03', amount: 1200, sourceOrReason: 'Renta', status: 'CONFIRMADO' },
+  { id: 'm4', kind: 'GASTO', date: '2025-11-05', amount: 40, sourceOrReason: 'Supermercado', status: 'CONFIRMADO' },
+  { id: 'm5', kind: 'INGRESO', date: '2025-11-10', amount: 1500, sourceOrReason: 'Sueldo', status: 'CONFIRMADO' },
+  { id: 'm6', kind: 'GASTO', date: '2025-11-12', amount: 60, sourceOrReason: 'Transporte', status: 'CONFIRMADO' },
+  { id: 'm7', kind: 'GASTO', date: '2025-11-15', amount: 85, sourceOrReason: 'Cena afuera', status: 'CONFIRMADO' },
+  { id: 'm8', kind: 'INGRESO', date: '2025-11-25', amount: 300, sourceOrReason: 'Ingreso futuro', status: 'PLANIFICADO' },
+]
+
+export const sampleObjectives = [
   {
-    id: 'm1',
-    kind: 'INGRESO',
-    date: '2025-11-05',
-    amount: 1500,
-    sourceOrReason: 'Sueldo principal',
-    status: 'REAL',
+    id: 'obj1',
+    name: 'Ahorrar 3000 para mudarme',
+    area: 'FINANZAS',
+    status: 'ACTIVO',
+    priorityLevel: 'ALTA',
+    description: 'Crear un fondo para mudarme a un lugar más cómodo.',
+    startDate: '2025-11-01',
+    endDate: '2026-04-30',
+    targetValue: 3000,
+    currentValue: 1050,
   },
   {
-    id: 'm2',
-    kind: 'GASTO',
-    date: '2025-11-06',
-    amount: 500,
-    sourceOrReason: 'Alquiler',
-    status: 'REAL',
+    id: 'obj2',
+    name: 'Ordenar finanzas del mes',
+    area: 'FINANZAS',
+    status: 'ACTIVO',
+    priorityLevel: 'MEDIA',
+    description: 'Tener todos los gastos e ingresos del mes registrados.',
+    startDate: '2025-11-01',
+    endDate: '2025-11-30',
+    targetValue: 0,
+    currentValue: 0,
   },
   {
-    id: 'm3',
-    kind: 'GASTO',
-    date: '2025-11-07',
-    amount: 60,
-    sourceOrReason: 'Teléfono',
-    status: 'REAL',
+    id: 'obj3',
+    name: 'Mejorar salud caminando 3 veces por semana',
+    area: 'SALUD',
+    status: 'PAUSADO',
+    priorityLevel: 'BAJA',
+    description: '',
+    startDate: '2025-10-01',
+    endDate: '2025-12-31',
+    targetValue: 0,
+    currentValue: 0,
+  },
+]
+
+export const sampleActivities = [
+  {
+    id: 'act1',
+    date: '2025-11-28',
+    name: 'Registrar gastos del día',
+    description: 'Anotar todos los movimientos de hoy en la app.',
+    type: 'FINANCIERA',
+    objectiveId: 'obj2',
+    status: 'HECHA',
   },
   {
-    id: 'm4',
-    kind: 'GASTO',
-    date: '2025-11-10',
-    amount: 20,
-    sourceOrReason: 'Comida',
-    status: 'REAL',
+    id: 'act2',
+    date: '2025-11-29',
+    name: 'Revisión rápida de ingresos',
+    description: 'Verificar que todos los ingresos del mes estén cargados.',
+    type: 'FINANCIERA',
+    objectiveId: 'obj2',
+    status: 'HECHA',
   },
   {
-    id: 'm5',
-    kind: 'INGRESO',
-    date: '2025-11-15',
-    amount: 200,
-    sourceOrReason: 'Trabajo extra',
-    status: 'REAL',
+    id: 'act3',
+    date: '2025-11-30',
+    name: 'Plan de ahorro para mudanza',
+    description: 'Definir cuánto separar por semana.',
+    type: 'FINANCIERA',
+    objectiveId: 'obj1',
+    status: 'PENDIENTE',
   },
   {
-    id: 'm6',
-    kind: 'GASTO',
-    date: '2025-11-15',
-    amount: 14,
-    sourceOrReason: 'Netflix',
-    status: 'REAL',
+    id: 'act4',
+    date: '2025-12-01',
+    name: 'Cargar gastos pendientes',
+    description: 'Cargar en la app todos los tickets que faltan.',
+    type: 'FINANCIERA',
+    objectiveId: 'obj2',
+    status: 'PENDIENTE',
   },
-  {
-    id: 'm7',
-    kind: 'GASTO',
-    date: '2025-11-20',
-    amount: 16,
-    sourceOrReason: 'Spotify',
-    status: 'PLANIFICADO',
-  },
-  {
-    id: 'm8',
-    kind: 'INGRESO',
-    date: '2025-11-25',
-    amount: 300,
-    sourceOrReason: 'Ingreso futuro',
-    status: 'PLANIFICADO',
-  },
-];
+]
