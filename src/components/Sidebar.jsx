@@ -5,6 +5,7 @@ function Sidebar({ currentPage, onNavigate }) {
     { id: 'objetivos', label: 'Objetivos' },
     { id: 'actividades', label: 'Actividades' },
     { id: 'calendario', label: 'Calendario' },
+    { id: 'registrar', label: 'Registrar' },
   ]
 
   return (

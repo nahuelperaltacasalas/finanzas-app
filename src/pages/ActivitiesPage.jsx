@@ -1,7 +1,9 @@
-import { sampleActivities } from '../lib/sampleData.js'
+import { useData } from '../context/DataContext.jsx'
 
 function ActivitiesPage() {
-  const activities = [...sampleActivities].sort((a, b) =>
+  const { activities } = useData()
+
+  const sorted = [...activities].sort((a, b) =>
     a.date < b.date ? 1 : -1,
   )
 
@@ -9,11 +11,11 @@ function ActivitiesPage() {
     <div className="page-root activities-page">
       <h1 className="page-title">Actividades</h1>
       <p className="page-subtitle">
-        Registro de tus acciones diarias (datos de ejemplo).
+        Registro de tus acciones diarias vinculadas a objetivos.
       </p>
 
       <section className="card">
-        {activities.length > 0 ? (
+        {sorted.length > 0 ? (
           <table className="activities-table">
             <thead>
               <tr>
@@ -25,7 +27,7 @@ function ActivitiesPage() {
               </tr>
             </thead>
             <tbody>
-              {activities.map((act) => (
+              {sorted.map((act) => (
                 <tr key={act.id}>
                   <td>{act.date}</td>
                   <td>{act.name}</td>

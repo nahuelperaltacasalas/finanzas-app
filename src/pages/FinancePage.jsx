@@ -1,9 +1,10 @@
-import { sampleMovements } from '../lib/sampleData.js'
+import { useData } from '../context/DataContext.jsx'
 
 function FinancePage() {
-  const incomes = sampleMovements.filter((m) => m.kind === 'INGRESO')
-  const expenses = sampleMovements.filter((m) => m.kind === 'GASTO')
+  const { movements } = useData()
 
+  const incomes = movements.filter((m) => m.kind === 'INGRESO')
+  const expenses = movements.filter((m) => m.kind === 'GASTO')
   const totalIncome = incomes.reduce((acc, m) => acc + m.amount, 0)
   const totalExpense = expenses.reduce((acc, m) => acc + m.amount, 0)
 
@@ -11,7 +12,7 @@ function FinancePage() {
     <div className="page-root finance-page">
       <h1 className="page-title">Finanzas</h1>
       <p className="page-subtitle">
-        Listado de ingresos y gastos (datos de ejemplo).
+        Listado de ingresos y gastos registrados en esta sesión.
       </p>
 
       <section className="card">

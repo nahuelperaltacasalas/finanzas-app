@@ -1,16 +1,15 @@
-import {
-  sampleMovements,
-  sampleObjectives,
-  sampleActivities,
-} from '../lib/sampleData.js'
+import { useData } from '../context/DataContext.jsx'
 
 function DashboardPage() {
+  const { movements, objectives, activities } = useData()
+
   const today = new Date().toISOString().slice(0, 10)
   const monthPrefix = today.slice(0, 7)
 
-  const movementsThisMonth = sampleMovements.filter((m) =>
+  const movementsThisMonth = movements.filter((m) =>
     m.date.startsWith(monthPrefix),
   )
+
   const incomes = movementsThisMonth.filter((m) => m.kind === 'INGRESO')
   const expenses = movementsThisMonth.filter((m) => m.kind === 'GASTO')
 
@@ -18,14 +17,13 @@ function DashboardPage() {
   const totalExpense = expenses.reduce((acc, m) => acc + m.amount, 0)
   const monthBalance = totalIncome - totalExpense
 
-  const nextMovements = sampleMovements
+  const nextMovements = movements
     .filter((m) => m.status === 'PLANIFICADO')
+    .sort((a, b) => (a.date > b.date ? 1 : -1))
     .slice(0, 3)
 
-  const objectivesActive = sampleObjectives.filter(
-    (o) => o.status === 'ACTIVO',
-  )
-  const mainObjective = objectivesActive[0] || sampleObjectives[0]
+  const objectivesActive = objectives.filter((o) => o.status === 'ACTIVO')
+  const mainObjective = objectivesActive[0] || objectives[0]
 
   let mainProgress = 0
   if (mainObjective && mainObjective.targetValue > 0) {
@@ -37,8 +35,8 @@ function DashboardPage() {
     )
   }
 
-  const activitiesToday = sampleActivities.filter((a) => a.date === today)
-  const lastActivity = [...sampleActivities]
+  const activitiesToday = activities.filter((a) => a.date === today)
+  const lastActivity = [...activities]
     .filter((a) => a.status === 'HECHA')
     .sort((a, b) => (a.date < b.date ? 1 : -1))[0]
 
@@ -46,7 +44,7 @@ function DashboardPage() {
     <div className="page-root dashboard-page">
       <h1 className="page-title">Dashboard</h1>
       <p className="page-subtitle">
-        Resumen simple de tu situación actual (datos de ejemplo).
+        Resumen simple de tu situación actual (datos de esta sesión).
       </p>
 
       <section className="card">
@@ -67,7 +65,6 @@ function DashboardPage() {
 
       <section className="card">
         <h2 className="section-title">Finanzas del mes</h2>
-
         <div className="stats-grid" style={{ marginBottom: '8px' }}>
           <div className="stat-pill">
             <span>Ingresos</span>
@@ -82,10 +79,7 @@ function DashboardPage() {
             <strong>${monthBalance.toFixed(2)}</strong>
           </div>
         </div>
-
-        <p className="section-subtitle">
-          Próximos movimientos (planificados):
-        </p>
+        <p className="section-subtitle">Próximos movimientos (planificados):</p>
         {nextMovements.length > 0 ? (
           <ul>
             {nextMovements.map((m) => (
@@ -140,7 +134,6 @@ function DashboardPage() {
             No tienes actividades cargadas para hoy.
           </p>
         )}
-
         {lastActivity && (
           <p style={{ marginTop: '8px' }}>
             Última actividad realizada:{' '}

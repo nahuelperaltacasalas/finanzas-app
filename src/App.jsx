@@ -5,6 +5,8 @@ import FinancePage from './pages/FinancePage.jsx'
 import ObjectivesPage from './pages/ObjectivesPage.jsx'
 import ActivitiesPage from './pages/ActivitiesPage.jsx'
 import CalendarPage from './pages/CalendarPage.jsx'
+import RegisterPage from './pages/RegisterPage.jsx'
+import { DataProvider } from './context/DataContext.jsx'
 import './index.css'
 
 function App() {
@@ -16,15 +18,18 @@ function App() {
     objetivos: <ObjectivesPage />,
     actividades: <ActivitiesPage />,
     calendario: <CalendarPage />,
+    registrar: <RegisterPage />,
   }
 
   return (
-    <div className="app-root">
-      <div className="app-with-sidebar">
-        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
-        <main className="app-content">{pages[currentPage]}</main>
+    <DataProvider>
+      <div className="app-root">
+        <div className="app-with-sidebar">
+          <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+          <main className="app-content">{pages[currentPage]}</main>
+        </div>
       </div>
-    </div>
+    </DataProvider>
   )
 }
 

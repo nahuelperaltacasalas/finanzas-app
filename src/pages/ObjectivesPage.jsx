@@ -1,16 +1,18 @@
-import { sampleObjectives } from '../lib/sampleData.js'
+import { useData } from '../context/DataContext.jsx'
 
 function ObjectivesPage() {
+  const { objectives } = useData()
+
   return (
     <div className="page-root objectives-page">
       <h1 className="page-title">Objetivos</h1>
       <p className="page-subtitle">
-        Tus metas y objetivos definidos (datos de ejemplo).
+        Tus metas definidas con área, prioridad y estado.
       </p>
 
-      {sampleObjectives.length > 0 ? (
-        <ul>
-          {sampleObjectives.map((obj) => {
+      {objectives.length > 0 ? (
+        <ul className="objectives-list">
+          {objectives.map((obj) => {
             let progress = 0
             if (obj.targetValue > 0) {
               progress = Math.min(
@@ -18,7 +20,6 @@ function ObjectivesPage() {
                 Math.round((obj.currentValue / obj.targetValue) * 100),
               )
             }
-
             return (
               <li key={obj.id} className="card">
                 <h3 style={{ marginBottom: '4px' }}>{obj.name}</h3>
@@ -36,9 +37,11 @@ function ObjectivesPage() {
                     %)
                   </p>
                 )}
-                <p>
-                  Fechas: {obj.startDate} → {obj.endDate}
-                </p>
+                {obj.startDate && obj.endDate && (
+                  <p>
+                    Fechas: {obj.startDate} → {obj.endDate}
+                  </p>
+                )}
               </li>
             )
           })}
