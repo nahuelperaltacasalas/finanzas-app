@@ -1,36 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../context/DataContext.jsx'
-
-function toISODate(d) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-function startOfWeekMonday(d) {
-  // JS: 0=Sun..6=Sat → queremos lunes inicio
-  const day = d.getDay()
-  const diff = day === 0 ? -6 : 1 - day
-  const monday = new Date(d)
-  monday.setDate(d.getDate() + diff)
-  monday.setHours(0, 0, 0, 0)
-  return monday
-}
-
-function endOfWeekSunday(d) {
-  const monday = startOfWeekMonday(d)
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
-  sunday.setHours(23, 59, 59, 999)
-  return sunday
-}
-
-function daysBetween(a, b) {
-  // a,b: Date (00:00)
-  const ms = 24 * 60 * 60 * 1000
-  return Math.floor((a.getTime() - b.getTime()) / ms)
-}
+import {
+  daysBetween,
+  endOfWeekSunday,
+  getTodayISO,
+  startOfWeekMonday,
+  toISODate,
+} from '../lib/dateUtils.js'
 
 function KindBadge({ kind }) {
   const map = {
@@ -77,10 +53,9 @@ function Section({ title, subtitle, count, children }) {
 }
 
 export default function PendingPage() {
-  const { getPendingItems, confirmMovement, resolveGoal, resolveTask, todayISO } =
-    useData()
+  const { getPendingItems, confirmMovement, resolveGoal, resolveTask, todayISO } = useData()
 
-  const today = todayISO ?? toISODate(new Date())
+  const today = todayISO ?? getTodayISO()
 
   const [filter, setFilter] = useState('all') // all | movements | goals | tasks
 

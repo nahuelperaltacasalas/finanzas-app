@@ -1,12 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../context/DataContext.jsx'
-
-function toISODate(d) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
+import { getTodayISO } from '../lib/dateUtils.js'
 
 export default function ActivitiesPage() {
   const { tasks, resolveTask, addTask, activityLog } = useData()
@@ -14,7 +8,7 @@ export default function ActivitiesPage() {
   const [tab, setTab] = useState('tasks') // tasks | log
   const [filter, setFilter] = useState('pending') // pending | done | canceled | all
 
-  const todayISO = useMemo(() => toISODate(new Date()), [])
+  const todayISO = useMemo(() => getTodayISO(), [])
 
   const filteredTasks = useMemo(() => {
     const list = tasks ?? []

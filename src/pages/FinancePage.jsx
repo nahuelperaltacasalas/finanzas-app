@@ -1,12 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../context/DataContext.jsx'
-
-function toISODate(d) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
+import { toISODate } from '../lib/dateUtils.js'
 
 function startOfMonth(d) {
   const x = new Date(d)

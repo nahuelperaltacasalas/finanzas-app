@@ -1,5 +1,31 @@
 // Utility functions for working with dates and calendars
 
+export function getTodayISO() {
+  return toISODate(new Date())
+}
+
+export function startOfWeekMonday(date = new Date()) {
+  const day = date.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  const monday = new Date(date)
+  monday.setDate(date.getDate() + diff)
+  monday.setHours(0, 0, 0, 0)
+  return monday
+}
+
+export function endOfWeekSunday(date = new Date()) {
+  const monday = startOfWeekMonday(date)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+  sunday.setHours(23, 59, 59, 999)
+  return sunday
+}
+
+export function daysBetween(a, b) {
+  const ms = 24 * 60 * 60 * 1000
+  return Math.floor((a.getTime() - b.getTime()) / ms)
+}
+
 /**
  * Array of month names in Spanish. Used for labeling the calendar.
  */

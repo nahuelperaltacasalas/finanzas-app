@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useData } from '../context/DataContext.jsx'
+import { getTodayISO } from '../lib/dateUtils.js'
 
 const effectiveAmount = (m) => Number(m?.finalAmount ?? m?.amount ?? 0)
 
@@ -7,7 +8,7 @@ export default function DashboardPage() {
   const { movements = [], objectives = [], activityLog = [], getPendingItems, todayISO: ctxToday } =
     useData()
 
-  const todayISO = ctxToday ?? new Date().toISOString().slice(0, 10)
+  const todayISO = ctxToday ?? getTodayISO()
 
   const pendingBuckets = useMemo(() => {
     try {
