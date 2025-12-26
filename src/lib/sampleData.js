@@ -106,42 +106,5 @@ export const sampleObjectives = [
   },
 ]
 
-// Actividades de ejemplo
-export const sampleActivities = [
-  {
-    id: 'act1',
-    date: '2025-11-28',
-    name: 'Registrar gastos del día',
-    description: 'Anotar todos los movimientos de hoy en la app.',
-    type: 'FINANCIERA',
-    objectiveId: 'obj2',
-    status: 'HECHA',
-  },
-  {
-    id: 'act2',
-    date: '2025-11-29',
-    name: 'Revisión rápida de ingresos',
-    description: 'Verificar que todos los ingresos del mes estén cargados.',
-    type: 'FINANCIERA',
-    objectiveId: 'obj2',
-    status: 'HECHA',
-  },
-  {
-    id: 'act3',
-    date: '2025-11-30',
-    name: 'Plan de ahorro para mudanza',
-    description: 'Definir cuánto separar por semana.',
-    type: 'FINANCIERA',
-    objectiveId: 'obj1',
-    status: 'PENDIENTE',
-  },
-  {
-    id: 'act4',
-    date: '2025-12-01',
-    name: 'Cargar gastos pendientes',
-    description: 'Cargar en la app todos los tickets que faltan.',
-    type: 'FINANCIERA',
-    objectiveId: 'obj2',
-    status: 'PENDIENTE',
-  },
-]
+// Actividades de ejemplo (se inicia vacío para que el log sea solo runtime)
+export const sampleActivities = []

@@ -161,7 +161,7 @@ export default function ActivitiesPage() {
 
             {sortedLog.length === 0 ? (
               <div className="placeholder-text" style={{ marginTop: 10 }}>
-                No hay eventos todavía.
+                No hay eventos aún.
               </div>
             ) : (
               <div style={{ marginTop: 10, overflowX: 'auto' }}>

@@ -1,9 +1,5 @@
 import { createContext, useContext, useMemo, useState } from 'react'
-import {
-  sampleMovements,
-  sampleObjectives,
-  sampleActivities,
-} from '../lib/sampleData.js'
+import { sampleMovements, sampleObjectives } from '../lib/sampleData.js'
 
 const DataContext = createContext(null)
 
@@ -35,7 +31,7 @@ export function DataProvider({ children }) {
   const [notes, setNotes] = useState([])
 
   // Activity Log automático (historial)
-  const [activityLog, setActivityLog] = useState(sampleActivities ?? [])
+  const [activityLog, setActivityLog] = useState([])
 
   const addActivityLog = (entry) => {
     setActivityLog((prev) => {

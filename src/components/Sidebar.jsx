@@ -4,6 +4,8 @@ import { useData } from '../context/DataContext.jsx'
 function Sidebar({ currentPage, onNavigate }) {
   const { getPendingItems } = useData()
 
+  const DEV_MODE = false
+
   const pendingCount = useMemo(() => {
     return getPendingItems({ filter: 'all' }).length
   }, [getPendingItems])
@@ -15,7 +17,7 @@ function Sidebar({ currentPage, onNavigate }) {
     { id: 'objetivos', label: 'Objetivos' },
     { id: 'actividades', label: 'Actividades' },
     { id: 'calendario', label: 'Calendario' },
-    { id: 'registrar', label: 'Dev: Registrar' }, // ✅ dev tool
+    ...(DEV_MODE ? [{ id: 'registrar', label: 'Dev: Registrar' }] : []), // ✅ dev tool
   ]
 
   return (

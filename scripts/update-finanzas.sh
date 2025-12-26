@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 echo "== Finanzas App: actualización rápida =="
+
+echo "WARNING: This will OVERWRITE core files."
+read -p 'Type OVERWRITE to continue: ' ans
+if [ "$ans" != "OVERWRITE" ]; then
+  echo "Aborted."
+  exit 1
+fi
+
+ts=$(date +"%Y%m%d-%H%M%S")
+mkdir -p backups
+tar -czf "backups/src-backup-$ts.tgz" src scripts || true
 
 # Asegurar carpeta de contexto
 mkdir -p src/context

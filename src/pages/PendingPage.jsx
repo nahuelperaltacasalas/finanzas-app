@@ -140,6 +140,18 @@ export default function PendingPage() {
       .sort((a, b) => (a.dateISO ?? '').localeCompare(b.dateISO ?? ''))
   }, [items, todayISO, weekStartISO, weekEndISO])
 
+  // SIN FECHA / UPCOMING
+  const noDateItems = useMemo(() => {
+    return items
+      .filter((it) => !it.dateISO)
+      .sort((a, b) => {
+        const aCreated = a.data?.createdAt ?? ''
+        const bCreated = b.data?.createdAt ?? ''
+        if (aCreated || bCreated) return (bCreated || '').localeCompare(aCreated || '')
+        return String(a.id ?? '').localeCompare(String(b.id ?? ''))
+      })
+  }, [items])
+
   const renderRow = (it) => {
     const data = it.data ?? {}
 
@@ -335,6 +347,18 @@ export default function PendingPage() {
           <div className="placeholder-text">Nada más por esta semana.</div>
         ) : (
           weekItems.map(renderRow)
+        )}
+      </Section>
+
+      <Section
+        title="SIN FECHA"
+        subtitle="Pendientes sin fecha asignada. Completa la información o agenda una fecha."
+        count={noDateItems.length}
+      >
+        {noDateItems.length === 0 ? (
+          <div className="placeholder-text">No hay pendientes sin fecha.</div>
+        ) : (
+          noDateItems.map(renderRow)
         )}
       </Section>
 
