@@ -7,7 +7,11 @@ function Sidebar({ currentPage, onNavigate }) {
   const DEV_MODE = false
 
   const pendingCount = useMemo(() => {
-    return getPendingItems({ filter: 'all' }).length
+    try {
+      return getPendingItems?.({ filter: 'all' })?.length ?? 0
+    } catch {
+      return 0
+    }
   }, [getPendingItems])
 
   const baseItems = [

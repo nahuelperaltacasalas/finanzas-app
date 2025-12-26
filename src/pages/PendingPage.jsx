@@ -80,6 +80,8 @@ export default function PendingPage() {
   const { getPendingItems, confirmMovement, resolveGoal, resolveTask, todayISO } =
     useData()
 
+  const today = todayISO ?? toISODate(new Date())
+
   const [filter, setFilter] = useState('all') // all | movements | goals | tasks
 
   const now = useMemo(() => {
@@ -101,7 +103,8 @@ export default function PendingPage() {
   const items = useMemo(() => {
     // normalizamos dateISO y aplanamos data
     return (all ?? []).map((it) => {
-      const dateISO = it.date ?? null
+      const dateISO =
+        it.dateISO ?? it.date ?? it.data?.date ?? it.data?.dueDate ?? null
       return {
         ...it,
         dateISO,
@@ -113,32 +116,32 @@ export default function PendingPage() {
   // HOY
   const todayItems = useMemo(() => {
     return items
-      .filter((it) => it.dateISO && it.dateISO === todayISO)
+      .filter((it) => it.dateISO && it.dateISO === today)
       .sort((a, b) => (a.kind ?? '').localeCompare(b.kind ?? ''))
-  }, [items, todayISO])
+  }, [items, today])
 
   // ATRASADO (prioridad: más días atrasado primero)
   const overdueItems = useMemo(() => {
     return items
-      .filter((it) => it.dateISO && it.dateISO < todayISO)
+      .filter((it) => it.dateISO && it.dateISO < today)
       .map((it) => {
         const d = new Date(it.dateISO + 'T00:00:00')
         const overdueDays = daysBetween(now, d)
         return { ...it, overdueDays }
       })
       .sort((a, b) => (b.overdueDays ?? 0) - (a.overdueDays ?? 0))
-  }, [items, todayISO, now])
+  }, [items, today, now])
 
   // ESTA SEMANA (lun-dom) -> solo próximos dentro de la semana actual
   const weekItems = useMemo(() => {
     return items
       .filter((it) => {
         if (!it.dateISO) return false
-        if (it.dateISO <= todayISO) return false // excluye hoy y atrasado
+        if (it.dateISO <= today) return false // excluye hoy y atrasado
         return it.dateISO >= weekStartISO && it.dateISO <= weekEndISO
       })
       .sort((a, b) => (a.dateISO ?? '').localeCompare(b.dateISO ?? ''))
-  }, [items, todayISO, weekStartISO, weekEndISO])
+  }, [items, today, weekStartISO, weekEndISO])
 
   // SIN FECHA / UPCOMING
   const noDateItems = useMemo(() => {
@@ -260,7 +263,7 @@ export default function PendingPage() {
                 <button
                   className="btn"
                   onClick={() => {
-                    const v = prompt('Nueva fecha (YYYY-MM-DD):', String(it.dateISO ?? todayISO))
+                    const v = prompt('Nueva fecha (YYYY-MM-DD):', String(it.dateISO ?? today))
                     if (!v) return
 
                     if (it.kind === 'goal') {

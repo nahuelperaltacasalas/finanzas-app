@@ -7,4 +7,5 @@ mkdir -p backups
 tar -czf "backups/src-backup-$ts.tgz" src scripts || true
 
 echo "Este repo ya está alineado al SSOT. Este script no sobrescribe archivos core."
+echo "Para scripts legacy que resetean archivos, revisa scripts/legacy/ y úsalos bajo tu propio riesgo."
 exit 0
