@@ -10,15 +10,16 @@ function Sidebar({ currentPage, onNavigate }) {
     return getPendingItems({ filter: 'all' }).length
   }, [getPendingItems])
 
-  const items = [
+  const baseItems = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'pendientes', label: `Pendientes${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
     { id: 'finanzas', label: 'Finanzas' },
     { id: 'objetivos', label: 'Objetivos' },
     { id: 'actividades', label: 'Actividades' },
     { id: 'calendario', label: 'Calendario' },
-    ...(DEV_MODE ? [{ id: 'registrar', label: 'Dev: Registrar' }] : []), // ✅ dev tool
   ]
+
+  const items = [...baseItems, ...(DEV_MODE ? [{ id: 'registrar', label: 'Dev: Registrar' }] : [])]
 
   return (
     <aside className="sidebar">
