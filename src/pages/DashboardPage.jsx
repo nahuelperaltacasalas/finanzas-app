@@ -1,148 +1,138 @@
+import { useMemo } from 'react'
 import { useData } from '../context/DataContext.jsx'
 
-function DashboardPage() {
-  const { movements, objectives, activities } = useData()
+function sum(arr) {
+  return arr.reduce((acc, n) => acc + (Number(n) || 0), 0)
+}
 
-  const today = new Date().toISOString().slice(0, 10)
-  const monthPrefix = today.slice(0, 7)
+export default function DashboardPage() {
+  const {
+    movements = [],
+    objectives = [],
+    tasks = [],
+    notes = [],
+    activityLog = [],
+    getPendingItems,
+  } = useData()
 
-  const movementsThisMonth = movements.filter((m) =>
-    m.date.startsWith(monthPrefix),
+  const pendingCount = useMemo(() => {
+    try {
+      return (getPendingItems?.({ filter: 'all' }) ?? []).length
+    } catch {
+      return 0
+    }
+  }, [getPendingItems])
+
+  const confirmedMovements = useMemo(
+    () => movements.filter((m) => (m.status ?? 'pending') === 'confirmed'),
+    [movements]
   )
 
-  const incomes = movementsThisMonth.filter((m) => m.kind === 'INGRESO')
-  const expenses = movementsThisMonth.filter((m) => m.kind === 'GASTO')
+  const monthISO = useMemo(() => {
+    const d = new Date()
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    return `${y}-${m}` // YYYY-MM
+  }, [])
 
-  const totalIncome = incomes.reduce((acc, m) => acc + m.amount, 0)
-  const totalExpense = expenses.reduce((acc, m) => acc + m.amount, 0)
-  const monthBalance = totalIncome - totalExpense
+  const confirmedThisMonth = useMemo(() => {
+    return confirmedMovements.filter((m) => {
+      const dateStr = m.date ?? null
+      return dateStr && dateStr.startsWith(monthISO)
+    })
+  }, [confirmedMovements, monthISO])
 
-  const nextMovements = movements
-    .filter((m) => m.status === 'PLANIFICADO')
-    .sort((a, b) => (a.date > b.date ? 1 : -1))
-    .slice(0, 3)
-
-  const objectivesActive = objectives.filter((o) => o.status === 'ACTIVO')
-  const mainObjective = objectivesActive[0] || objectives[0]
-
-  let mainProgress = 0
-  if (mainObjective && mainObjective.targetValue > 0) {
-    mainProgress = Math.min(
-      100,
-      Math.round(
-        (mainObjective.currentValue / mainObjective.targetValue) * 100,
-      ),
+  const incomeThisMonth = useMemo(() => {
+    return sum(
+      confirmedThisMonth
+        .filter((m) => m.type === 'ingreso')
+        .map((m) => m.finalAmount ?? m.amount ?? 0)
     )
-  }
+  }, [confirmedThisMonth])
 
-  const activitiesToday = activities.filter((a) => a.date === today)
-  const lastActivity = [...activities]
-    .filter((a) => a.status === 'HECHA')
-    .sort((a, b) => (a.date < b.date ? 1 : -1))[0]
+  const expensesThisMonth = useMemo(() => {
+    return sum(
+      confirmedThisMonth
+        .filter((m) => m.type === 'gasto')
+        .map((m) => m.finalAmount ?? m.amount ?? 0)
+    )
+  }, [confirmedThisMonth])
+
+  const balanceThisMonth = useMemo(
+    () => incomeThisMonth - expensesThisMonth,
+    [incomeThisMonth, expensesThisMonth]
+  )
+
+  const activeObjectives = useMemo(() => {
+    // "activo" = tiene metas pending o no tiene metas (todavía)
+    return objectives.filter((o) => {
+      const goals = o.goals ?? []
+      if (goals.length === 0) return true
+      return goals.some((g) => (g.status ?? 'pending') === 'pending')
+    })
+  }, [objectives])
+
+  const pendingTasks = useMemo(() => {
+    return tasks.filter((t) => (t.status ?? 'pending') === 'pending')
+  }, [tasks])
 
   return (
-    <div className="page-root dashboard-page">
-      <h1 className="page-title">Dashboard</h1>
-      <p className="page-subtitle">
-        Resumen simple de tu situación actual (datos de esta sesión).
-      </p>
+    <div className="page">
+      <div className="page-header">
+        <h2 style={{ margin: 0 }}>Dashboard</h2>
+        <div style={{ opacity: 0.8, marginTop: 6 }}>
+          Resumen rápido del mes y pendientes
+        </div>
+      </div>
 
-      <section className="card">
-        <h2 className="section-title">Hoy</h2>
-        <p>
-          Fecha: <strong>{today}</strong>
-        </p>
-        {activitiesToday.length > 0 ? (
-          <p>
-            Actividades de hoy: <strong>{activitiesToday.length}</strong>
-          </p>
-        ) : (
-          <p className="placeholder-text">
-            No tienes actividades registradas para hoy.
-          </p>
-        )}
-      </section>
-
-      <section className="card">
-        <h2 className="section-title">Finanzas del mes</h2>
-        <div className="stats-grid" style={{ marginBottom: '8px' }}>
-          <div className="stat-pill">
-            <span>Ingresos</span>
-            <strong>${totalIncome.toFixed(2)}</strong>
-          </div>
-          <div className="stat-pill">
-            <span>Gastos</span>
-            <strong>${totalExpense.toFixed(2)}</strong>
-          </div>
-          <div className="stat-pill">
-            <span>Balance</span>
-            <strong>${monthBalance.toFixed(2)}</strong>
+      <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
+        <div className="card">
+          <div style={{ fontWeight: 700 }}>Pendientes</div>
+          <div style={{ fontSize: 28, marginTop: 6 }}>{pendingCount}</div>
+          <div style={{ opacity: 0.8, marginTop: 4 }}>
+            Movimientos + metas acción + actividades
           </div>
         </div>
-        <p className="section-subtitle">Próximos movimientos (planificados):</p>
-        {nextMovements.length > 0 ? (
-          <ul>
-            {nextMovements.map((m) => (
-              <li key={m.id}>
-                {m.date} — {m.kind === 'INGRESO' ? 'Ingreso' : 'Gasto'} — $
-                {m.amount.toFixed(2)} ({m.sourceOrReason})
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="placeholder-text">
-            No hay próximos movimientos planificados.
-          </p>
-        )}
-      </section>
 
-      {mainObjective && (
-        <section className="card">
-          <h2 className="section-title">Objetivo principal</h2>
-          <p>
-            <strong>{mainObjective.name}</strong>
-          </p>
-          <p>
-            Área: <strong>{mainObjective.area}</strong> | Estado:{' '}
-            <strong>{mainObjective.status}</strong> | Prioridad:{' '}
-            <strong>{mainObjective.priorityLevel}</strong>
-          </p>
-          {mainObjective.targetValue > 0 && (
-            <p>
-              Progreso: {mainObjective.currentValue} /{' '}
-              {mainObjective.targetValue} ({mainProgress}%)
-            </p>
-          )}
-        </section>
-      )}
+        <div className="card">
+          <div style={{ fontWeight: 700 }}>Balance del mes</div>
+          <div style={{ fontSize: 28, marginTop: 6 }}>
+            ${Number(balanceThisMonth).toFixed(2)}
+          </div>
+          <div style={{ opacity: 0.8, marginTop: 4 }}>
+            Ingresos: ${Number(incomeThisMonth).toFixed(2)} · Gastos: $
+            {Number(expensesThisMonth).toFixed(2)}
+          </div>
+        </div>
 
-      <section className="card">
-        <h2 className="section-title">Acción</h2>
-        {activitiesToday.length > 0 ? (
-          <>
-            <p>Actividades de hoy:</p>
-            <ul>
-              {activitiesToday.map((a) => (
-                <li key={a.id}>
-                  {a.name} ({a.type}) — {a.status}
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : (
-          <p className="placeholder-text">
-            No tienes actividades cargadas para hoy.
-          </p>
-        )}
-        {lastActivity && (
-          <p style={{ marginTop: '8px' }}>
-            Última actividad realizada:{' '}
-            <strong>{lastActivity.name}</strong> ({lastActivity.date})
-          </p>
-        )}
-      </section>
+        <div className="card">
+          <div style={{ fontWeight: 700 }}>Objetivos activos</div>
+          <div style={{ fontSize: 28, marginTop: 6 }}>
+            {activeObjectives.length}
+          </div>
+          <div style={{ opacity: 0.8, marginTop: 4 }}>
+            Total objetivos: {objectives.length}
+          </div>
+        </div>
+
+        <div className="card">
+          <div style={{ fontWeight: 700 }}>Actividades pendientes</div>
+          <div style={{ fontSize: 28, marginTop: 6 }}>
+            {pendingTasks.length}
+          </div>
+          <div style={{ opacity: 0.8, marginTop: 4 }}>
+            Total actividades: {tasks.length}
+          </div>
+        </div>
+
+        <div className="card">
+          <div style={{ fontWeight: 700 }}>Notas</div>
+          <div style={{ fontSize: 28, marginTop: 6 }}>{notes.length}</div>
+          <div style={{ opacity: 0.8, marginTop: 4 }}>
+            Activity log: {activityLog.length}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
-
-export default DashboardPage

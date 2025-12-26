@@ -767,4 +767,207 @@ tbody tr:hover {
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.75);
 }
 
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.topbar-title{
+  margin:0;
+  font-size:20px;
+}
+
+.topbar-right{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.topbar-user{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.btn{
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06);
+  cursor:pointer;
+}
+
+.btn.primary{
+  border:1px solid rgba(255,255,255,0.22);
+  background:rgba(255,255,255,0.14);
+  font-weight:700;
+}
+
+.btn:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+
+.modal{
+  width:min(560px, 100%);
+  border-radius:14px;
+  padding:14px;
+  background:#0f1117;
+  border:1px solid rgba(255,255,255,0.12);
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.modal-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:12px;
+}
+
+.form{
+  display:grid;
+  gap:10px;
+}
+
+.form label{
+  display:grid;
+  gap:6px;
+  font-size:14px;
+  opacity:0.95;
+}
+
+.form input, .form select{
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06);
+  color:inherit;
+}
+
+/* =========================================================
+   MODAL — FIX COMPLETO (SCROLL + HEADER/FOOTER STICKY)
+   Pegar al FINAL del archivo para pisar reglas previas
+   ========================================================= */
+
+/* Backdrop: ocupa pantalla y permite scroll */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  /* ✅ permitir scroll si el modal es alto */
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* ✅ margen para que el modal no pegue a los bordes */
+  padding: 16px;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  /* ✅ mejor scroll en mobile */
+  -webkit-overflow-scrolling: touch;
+
+  /* ❌ NO usar flex centering (rompe scroll en modales largos) */
+  display: block !important;
+}
+
+/* Modal: scroll interno y límite de altura */
+.modal {
+  width: min(720px, 100%);
+  margin: 0 auto;
+
+  /* ✅ nunca se sale de la pantalla */
+  max-height: calc(100vh - 32px);
+
+  /* ✅ scroll dentro del modal */
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  border-radius: 14px;
+  background: #0f1117;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  /* ✅ padding interno (si ya tenías, esto lo estandariza) */
+  padding: 14px;
+}
+
+/* Header pegado arriba dentro del modal */
+.modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  background: #0f1117;
+  padding: 10px 0;
+  margin-bottom: 10px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Si usás un body del modal, mantenelo con padding */
+.modal-body {
+  padding: 0;
+}
+
+/* Footer pegado abajo dentro del modal */
+.modal-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+
+  background: #0f1117;
+  padding: 10px 0;
+  margin-top: 12px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Formularios dentro del modal */
+.modal .form {
+  display: grid;
+  gap: 10px;
+}
+
+.modal .form label {
+  display: grid;
+  gap: 6px;
+}
+
+.modal .form input,
+.modal .form select,
+.modal .form textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+
 /* text… (continúa hasta EOF, omití aquí para que puedas confirmar si querés versión completa porque es MUY largo para un único mensaje) */
