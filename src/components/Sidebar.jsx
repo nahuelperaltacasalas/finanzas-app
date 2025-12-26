@@ -1,11 +1,21 @@
+import { useMemo } from 'react'
+import { useData } from '../context/DataContext.jsx'
+
 function Sidebar({ currentPage, onNavigate }) {
+  const { getPendingItems } = useData()
+
+  const pendingCount = useMemo(() => {
+    return getPendingItems({ filter: 'all' }).length
+  }, [getPendingItems])
+
   const items = [
     { id: 'dashboard', label: 'Dashboard' },
+    { id: 'pendientes', label: `Pendientes${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
     { id: 'finanzas', label: 'Finanzas' },
     { id: 'objetivos', label: 'Objetivos' },
     { id: 'actividades', label: 'Actividades' },
     { id: 'calendario', label: 'Calendario' },
-    { id: 'registrar', label: 'Registrar' },
+    { id: 'registrar', label: 'Dev: Registrar' }, // ✅ dev tool
   ]
 
   return (
