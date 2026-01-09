@@ -1,41 +1,64 @@
-import { createContext, useContext, useMemo, useState } from 'react'
-import {
-  sampleMovements,
-  sampleObjectives,
-  sampleActivities,
-} from '../lib/sampleData.js'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { sampleMovements, sampleObjectives } from '../lib/sampleData.js'
+import { toISODate } from '../lib/dateUtils.js'
 
 const DataContext = createContext(null)
 
-function toISODate(d = new Date()) {
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+const STORAGE_KEY = 'finanzas-ssot-v1'
 
 function makeId(prefix) {
   return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now()}`
 }
 
 export function DataProvider({ children }) {
+  const loadStored = () => {
+    if (typeof window === 'undefined') return null
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      if (!raw) return null
+      const parsed = JSON.parse(raw)
+      return parsed && typeof parsed === 'object' ? parsed : null
+    } catch {
+      return null
+    }
+  }
+
+  const stored = loadStored()
+
+  const normalizeObjectives = (list = []) =>
+    (list ?? []).map((o) => ({
+      ...o,
+      goals: (o.goals ?? []).map((g) => ({ ...g })),
+    }))
+
   // Hechos (dinero)
-  const [movements, setMovements] = useState(sampleMovements)
+  const [movements, setMovements] = useState(() => stored?.movements ?? sampleMovements)
 
   // Interpretación (objetivos con metas)
-  const [objectives, setObjectives] = useState(
-    // aseguramos goals como array
-    (sampleObjectives ?? []).map((o) => ({ ...o, goals: o.goals ?? [] }))
+  const [objectives, setObjectives] = useState(() =>
+    normalizeObjectives(stored?.objectives ?? sampleObjectives)
   )
 
   // Pilar: tareas/actividades (del usuario)
-  const [tasks, setTasks] = useState([])
+  const [tasks, setTasks] = useState(() => (Array.isArray(stored?.tasks) ? stored.tasks : []))
 
   // Pilar: notas
-  const [notes, setNotes] = useState([])
+  const [notes, setNotes] = useState(() => (Array.isArray(stored?.notes) ? stored.notes : []))
 
   // Activity Log automático (historial)
-  const [activityLog, setActivityLog] = useState(sampleActivities ?? [])
+  const [activityLog, setActivityLog] = useState(() =>
+    Array.isArray(stored?.activityLog) ? stored.activityLog : []
+  )
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const payload = { movements, objectives, tasks, notes, activityLog }
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+    } catch {
+      // almacenamiento opcional; ignoramos fallas
+    }
+  }, [movements, objectives, tasks, notes, activityLog])
 
   const addActivityLog = (entry) => {
     setActivityLog((prev) => {
@@ -83,9 +106,11 @@ export function DataProvider({ children }) {
 
   // outcome: 'EQUAL' | 'MORE' | 'LESS' | 'NO_SHOW'
   const confirmMovement = (movementId, { outcome, finalAmount } = {}) => {
+    let updated = false
     setMovements((prev) =>
       prev.map((m) => {
         if (m.id !== movementId) return m
+        updated = true
         const isNoShow = outcome === 'NO_SHOW'
         return {
           ...m,
@@ -100,7 +125,9 @@ export function DataProvider({ children }) {
       })
     )
 
-    addActivityAuto('movement_confirmed', { movementId, outcome, finalAmount })
+    if (updated) {
+      addActivityAuto('movement_confirmed', { movementId, outcome, finalAmount })
+    }
   }
 
   // =========================
@@ -220,7 +247,7 @@ export function DataProvider({ children }) {
   // =========================
   // PENDING INBOX (unificado)
   // =========================
-  const todayISO = toISODate()
+  const todayISO = toISODate(new Date())
 
   const pendingItems = useMemo(() => {
     const rank = { today: 0, overdue: 1, upcoming: 2 }

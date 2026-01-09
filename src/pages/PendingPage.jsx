@@ -1,36 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../context/DataContext.jsx'
-
-function toISODate(d) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-function startOfWeekMonday(d) {
-  // JS: 0=Sun..6=Sat → queremos lunes inicio
-  const day = d.getDay()
-  const diff = day === 0 ? -6 : 1 - day
-  const monday = new Date(d)
-  monday.setDate(d.getDate() + diff)
-  monday.setHours(0, 0, 0, 0)
-  return monday
-}
-
-function endOfWeekSunday(d) {
-  const monday = startOfWeekMonday(d)
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
-  sunday.setHours(23, 59, 59, 999)
-  return sunday
-}
-
-function daysBetween(a, b) {
-  // a,b: Date (00:00)
-  const ms = 24 * 60 * 60 * 1000
-  return Math.floor((a.getTime() - b.getTime()) / ms)
-}
+import {
+  daysBetween,
+  endOfWeekSunday,
+  getTodayISO,
+  startOfWeekMonday,
+  toISODate,
+} from '../lib/dateUtils.js'
 
 function KindBadge({ kind }) {
   const map = {
@@ -77,8 +53,9 @@ function Section({ title, subtitle, count, children }) {
 }
 
 export default function PendingPage() {
-  const { getPendingItems, confirmMovement, resolveGoal, resolveTask, todayISO } =
-    useData()
+  const { getPendingItems, confirmMovement, resolveGoal, resolveTask, todayISO } = useData()
+
+  const today = todayISO ?? getTodayISO()
 
   const [filter, setFilter] = useState('all') // all | movements | goals | tasks
 
@@ -101,7 +78,8 @@ export default function PendingPage() {
   const items = useMemo(() => {
     // normalizamos dateISO y aplanamos data
     return (all ?? []).map((it) => {
-      const dateISO = it.date ?? null
+      const dateISO =
+        it.dateISO ?? it.date ?? it.data?.date ?? it.data?.dueDate ?? null
       return {
         ...it,
         dateISO,
@@ -113,32 +91,44 @@ export default function PendingPage() {
   // HOY
   const todayItems = useMemo(() => {
     return items
-      .filter((it) => it.dateISO && it.dateISO === todayISO)
+      .filter((it) => it.dateISO && it.dateISO === today)
       .sort((a, b) => (a.kind ?? '').localeCompare(b.kind ?? ''))
-  }, [items, todayISO])
+  }, [items, today])
 
   // ATRASADO (prioridad: más días atrasado primero)
   const overdueItems = useMemo(() => {
     return items
-      .filter((it) => it.dateISO && it.dateISO < todayISO)
+      .filter((it) => it.dateISO && it.dateISO < today)
       .map((it) => {
         const d = new Date(it.dateISO + 'T00:00:00')
         const overdueDays = daysBetween(now, d)
         return { ...it, overdueDays }
       })
       .sort((a, b) => (b.overdueDays ?? 0) - (a.overdueDays ?? 0))
-  }, [items, todayISO, now])
+  }, [items, today, now])
 
   // ESTA SEMANA (lun-dom) -> solo próximos dentro de la semana actual
   const weekItems = useMemo(() => {
     return items
       .filter((it) => {
         if (!it.dateISO) return false
-        if (it.dateISO <= todayISO) return false // excluye hoy y atrasado
+        if (it.dateISO <= today) return false // excluye hoy y atrasado
         return it.dateISO >= weekStartISO && it.dateISO <= weekEndISO
       })
       .sort((a, b) => (a.dateISO ?? '').localeCompare(b.dateISO ?? ''))
-  }, [items, todayISO, weekStartISO, weekEndISO])
+  }, [items, today, weekStartISO, weekEndISO])
+
+  // SIN FECHA / UPCOMING
+  const noDateItems = useMemo(() => {
+    return items
+      .filter((it) => !it.dateISO)
+      .sort((a, b) => {
+        const aCreated = a.data?.createdAt ?? ''
+        const bCreated = b.data?.createdAt ?? ''
+        if (aCreated || bCreated) return (bCreated || '').localeCompare(aCreated || '')
+        return String(a.id ?? '').localeCompare(String(b.id ?? ''))
+      })
+  }, [items])
 
   const renderRow = (it) => {
     const data = it.data ?? {}
@@ -248,7 +238,7 @@ export default function PendingPage() {
                 <button
                   className="btn"
                   onClick={() => {
-                    const v = prompt('Nueva fecha (YYYY-MM-DD):', String(it.dateISO ?? todayISO))
+                    const v = prompt('Nueva fecha (YYYY-MM-DD):', String(it.dateISO ?? today))
                     if (!v) return
 
                     if (it.kind === 'goal') {
@@ -335,6 +325,18 @@ export default function PendingPage() {
           <div className="placeholder-text">Nada más por esta semana.</div>
         ) : (
           weekItems.map(renderRow)
+        )}
+      </Section>
+
+      <Section
+        title="SIN FECHA"
+        subtitle="Pendientes sin fecha asignada. Completa la información o agenda una fecha."
+        count={noDateItems.length}
+      >
+        {noDateItems.length === 0 ? (
+          <div className="placeholder-text">No hay pendientes sin fecha.</div>
+        ) : (
+          noDateItems.map(renderRow)
         )}
       </Section>
 

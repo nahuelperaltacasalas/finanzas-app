@@ -1,12 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useData } from '../context/DataContext.jsx'
-
-function toISODate(d) {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
+import { getTodayISO } from '../lib/dateUtils.js'
 
 function money(n) {
   const v = Number(n ?? 0)
@@ -47,7 +41,7 @@ export default function ObjectivesPage() {
 
   const [filter, setFilter] = useState('all') // all | pending | done | canceled
 
-  const todayISO = useMemo(() => toISODate(new Date()), [])
+  const todayISO = useMemo(() => getTodayISO(), [])
 
   const list = useMemo(() => {
     const arr = objectives ?? []

@@ -4,19 +4,26 @@ import { useData } from '../context/DataContext.jsx'
 function Sidebar({ currentPage, onNavigate }) {
   const { getPendingItems } = useData()
 
+  const DEV_MODE = false
+
   const pendingCount = useMemo(() => {
-    return getPendingItems({ filter: 'all' }).length
+    try {
+      return getPendingItems?.({ filter: 'all' })?.length ?? 0
+    } catch {
+      return 0
+    }
   }, [getPendingItems])
 
-  const items = [
+  const baseItems = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'pendientes', label: `Pendientes${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
     { id: 'finanzas', label: 'Finanzas' },
     { id: 'objetivos', label: 'Objetivos' },
     { id: 'actividades', label: 'Actividades' },
     { id: 'calendario', label: 'Calendario' },
-    { id: 'registrar', label: 'Dev: Registrar' }, // ✅ dev tool
   ]
+
+  const items = [...baseItems, ...(DEV_MODE ? [{ id: 'registrar', label: 'Dev: Registrar' }] : [])]
 
   return (
     <aside className="sidebar">
