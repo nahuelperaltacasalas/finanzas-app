@@ -1,3 +1,4 @@
+// src/pages/FinancePage.jsx
 import { useMemo, useState } from 'react'
 import { useData } from '../context/DataContext.jsx'
 
@@ -29,27 +30,23 @@ function money(n) {
 }
 
 function movementEffectiveAmount(m) {
-  // Si confirmaste con MORE/LESS, finalAmount es el que vale.
-  // Si no, usa amount.
-  const fa = m.finalAmount
-  if (fa === null || fa === undefined || Number.isNaN(Number(fa))) return Number(m.amount ?? 0)
-  return Number(fa)
+  const status = m.status ?? 'pending'
+  if (status === 'confirmed') return Number(m.amountReal ?? m.finalAmount ?? m.amount ?? 0)
+  return Number(m.amount ?? 0)
 }
 
 function movementDateISO(m) {
-  // Para finanzas/histórico usamos date (tu modelo).
-  // Si no hay, caemos al createdAt (solo para orden visual).
   if (m.date) return m.date
   if (m.createdAt) return String(m.createdAt).slice(0, 10)
   return null
 }
 
 export default function FinancePage() {
-  const { movements } = useData()
+  const { movements, getRealBalance, getExpectedBalance } = useData()
 
-  // filtros
   const [statusFilter, setStatusFilter] = useState('confirmed') // confirmed | pending | canceled | all
   const [range, setRange] = useState('month') // month | all
+  const [includeEstimated, setIncludeEstimated] = useState(true)
 
   const now = useMemo(() => {
     const d = new Date()
@@ -63,14 +60,12 @@ export default function FinancePage() {
   const filtered = useMemo(() => {
     const list = movements ?? []
 
-    // 1) status
     const byStatus = list.filter((m) => {
       const s = m.status ?? 'pending'
       if (statusFilter === 'all') return true
       return s === statusFilter
     })
 
-    // 2) rango
     const byRange = byStatus.filter((m) => {
       if (range === 'all') return true
       const d = movementDateISO(m)
@@ -78,7 +73,6 @@ export default function FinancePage() {
       return d >= monthStartISO && d <= monthEndISO
     })
 
-    // 3) ordenar: más reciente primero
     return byRange.sort((a, b) => {
       const da = movementDateISO(a) ?? '0000-00-00'
       const db = movementDateISO(b) ?? '0000-00-00'
@@ -96,9 +90,16 @@ export default function FinancePage() {
       else expense += amt
     }
 
-    const balance = income - expense
-    return { income, expense, balance }
+    return { income, expense, balance: income - expense }
   }, [filtered])
+
+  const realBalance = useMemo(() => {
+    return getRealBalance?.() ?? { income: 0, expense: 0, balance: 0 }
+  }, [getRealBalance, movements])
+
+  const expectedBalance = useMemo(() => {
+    return getExpectedBalance?.({ includeEstimated }) ?? { income: 0, expense: 0, balance: 0 }
+  }, [getExpectedBalance, includeEstimated, movements])
 
   return (
     <div className="page-root">
@@ -106,48 +107,35 @@ export default function FinancePage() {
         <div>
           <h2 className="topbar-title">Finanzas</h2>
           <div className="page-subtitle" style={{ marginTop: 6 }}>
-            Resumen numérico + historial. Por default: <strong>confirmados</strong> del <strong>mes actual</strong>.
+            Por defecto: <strong>confirmados</strong> del <strong>mes actual</strong>.
           </div>
         </div>
 
         <div className="topbar-right" style={{ flexWrap: 'wrap' }}>
-          {/* Status filter */}
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={includeEstimated}
+              onChange={(e) => setIncludeEstimated(e.target.checked)}
+            />
+            Incluir estimados (en Esperado)
+          </label>
+
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button
-              className="btn"
-              onClick={() => setStatusFilter('confirmed')}
-              disabled={statusFilter === 'confirmed'}
-              title="Solo confirmados"
-            >
+            <button className="btn" onClick={() => setStatusFilter('confirmed')} disabled={statusFilter === 'confirmed'}>
               Confirmados
             </button>
-            <button
-              className="btn"
-              onClick={() => setStatusFilter('pending')}
-              disabled={statusFilter === 'pending'}
-              title="Pendientes"
-            >
+            <button className="btn" onClick={() => setStatusFilter('pending')} disabled={statusFilter === 'pending'}>
               Pendientes
             </button>
-            <button
-              className="btn"
-              onClick={() => setStatusFilter('canceled')}
-              disabled={statusFilter === 'canceled'}
-              title="Cancelados"
-            >
+            <button className="btn" onClick={() => setStatusFilter('canceled')} disabled={statusFilter === 'canceled'}>
               Cancelados
             </button>
-            <button
-              className="btn"
-              onClick={() => setStatusFilter('all')}
-              disabled={statusFilter === 'all'}
-              title="Todos"
-            >
+            <button className="btn" onClick={() => setStatusFilter('all')} disabled={statusFilter === 'all'}>
               Todos
             </button>
           </div>
 
-          {/* Range */}
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn" onClick={() => setRange('month')} disabled={range === 'month'}>
               Mes
@@ -159,7 +147,17 @@ export default function FinancePage() {
         </div>
       </div>
 
-      {/* Summary cards */}
+      <div className="stats-grid">
+        <div className="card stat-pill">
+          <span>Saldo Real</span>
+          <strong>{money(realBalance.balance)}</strong>
+        </div>
+        <div className="card stat-pill">
+          <span>Saldo Esperado</span>
+          <strong>{money(expectedBalance.balance)}</strong>
+        </div>
+      </div>
+
       <div className="stats-grid">
         <div className="card stat-pill">
           <span>Ingresos</span>
@@ -175,15 +173,12 @@ export default function FinancePage() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="card">
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' }}>
           <div>
             <div className="section-title">Historial</div>
             <div className="section-subtitle" style={{ marginTop: 4 }}>
-              {range === 'month'
-                ? `Rango: ${monthStartISO} → ${monthEndISO}`
-                : 'Rango: todo'}
+              {range === 'month' ? `Rango: ${monthStartISO} → ${monthEndISO}` : 'Rango: todo'}
               {' · '}
               Estado: {statusFilter}
               {' · '}
@@ -205,6 +200,7 @@ export default function FinancePage() {
                   <th>Tipo</th>
                   <th>Título</th>
                   <th>Estado</th>
+                  <th>Estimado</th>
                   <th style={{ textAlign: 'right' }}>Monto</th>
                 </tr>
               </thead>
@@ -215,13 +211,15 @@ export default function FinancePage() {
                   const status = m.status ?? 'pending'
                   const title = m.title ?? '—'
                   const amt = movementEffectiveAmount(m)
+                  const est = m.estimated ? 'Sí' : 'No'
 
                   return (
                     <tr key={m.id}>
                       <td>{dateISO}</td>
-                      <td style={{ textTransform: 'capitalize' }}>{type}</td>
+                      <td>{type}</td>
                       <td>{title}</td>
-                      <td style={{ textTransform: 'capitalize' }}>{status}</td>
+                      <td>{status}</td>
+                      <td>{est}</td>
                       <td style={{ textAlign: 'right' }}>{money(amt)}</td>
                     </tr>
                   )

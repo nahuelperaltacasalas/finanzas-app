@@ -1,14 +1,9 @@
+// src/pages/RegisterPage.jsx
 import { useState } from 'react'
 import { useData } from '../context/DataContext.jsx'
 
 function RegisterPage() {
-  const {
-    objectives,
-    activities,
-    addMovement,
-    addObjective,
-    addActivity,
-  } = useData()
+  const { objectives = [], tasks = [], addMovement, addObjective, addTask } = useData()
 
   const [activeTab, setActiveTab] = useState('movement')
   const [message, setMessage] = useState('')
@@ -22,11 +17,15 @@ function RegisterPage() {
     status: 'REAL',
     objectiveId: '',
     activityId: '',
+    estimated: false,
   })
 
   const handleMovementChange = (e) => {
-    const { name, value } = e.target
-    setMovementForm((prev) => ({ ...prev, [name]: value }))
+    const { name, value, type, checked } = e.target
+    setMovementForm((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }))
   }
 
   const submitMovement = (e) => {
@@ -42,18 +41,24 @@ function RegisterPage() {
       return
     }
 
+    const isReal = movementForm.status === 'REAL'
+
     const newMovement = {
       id: undefined,
       kind: movementForm.kind,
       date: movementForm.date,
       amount: amountNumber,
       sourceOrReason: movementForm.description,
-      status: movementForm.status,
+      status: movementForm.status, // REAL | PLANIFICADO (normalize lo traduce)
       objectiveId: movementForm.objectiveId || null,
       activityId: movementForm.activityId || null,
+      estimated: movementForm.estimated,
+      // si es REAL, podemos setear confirmedAt de una (opcional, no obligatorio)
+      ...(isReal ? { confirmedAt: new Date().toISOString() } : {}),
     }
 
     addMovement(newMovement)
+
     setMovementForm({
       kind: 'INGRESO',
       amount: '',
@@ -62,8 +67,10 @@ function RegisterPage() {
       status: 'REAL',
       objectiveId: '',
       activityId: '',
+      estimated: false,
     })
-    setMessage('Movimiento registrado (solo dentro de esta sesión).')
+
+    setMessage('Movimiento registrado.')
   }
 
   // ---------- FORM OBJETIVO ----------
@@ -122,9 +129,11 @@ function RegisterPage() {
               timesPerPeriod: Number(objectiveForm.timesPerPeriod || 0),
             }
           : null,
+      goals: [],
     }
 
     addObjective(newObjective)
+
     setObjectiveForm({
       name: '',
       area: 'FINANZAS',
@@ -139,7 +148,8 @@ function RegisterPage() {
       frequency: 'NINGUNA',
       timesPerPeriod: '',
     })
-    setMessage('Objetivo registrado (solo dentro de esta sesión).')
+
+    setMessage('Objetivo registrado.')
   }
 
   // ---------- FORM ACTIVIDAD ----------
@@ -164,17 +174,18 @@ function RegisterPage() {
       return
     }
 
-    const newActivity = {
+    const newTask = {
       id: undefined,
-      date: activityForm.date,
-      name: activityForm.name,
+      title: activityForm.name,
+      dueDate: activityForm.date,
       description: activityForm.description,
       type: activityForm.type,
       objectiveId: activityForm.objectiveId || null,
-      status: activityForm.status,
+      status: activityForm.status === 'HECHA' ? 'done' : 'pending',
     }
 
-    addActivity(newActivity)
+    addTask(newTask)
+
     setActivityForm({
       name: '',
       date: '',
@@ -183,15 +194,14 @@ function RegisterPage() {
       objectiveId: '',
       description: '',
     })
-    setMessage('Actividad registrada (solo dentro de esta sesión).')
+
+    setMessage('Actividad registrada.')
   }
 
   return (
     <div className="page-root register-page">
       <h1 className="page-title">Registrar</h1>
-      <p className="page-subtitle">
-        Crear nuevos movimientos, objetivos y actividades para tu sistema.
-      </p>
+      <p className="page-subtitle">Crear nuevos movimientos, objetivos y actividades.</p>
 
       <div className="register-tabs">
         <button
@@ -225,11 +235,7 @@ function RegisterPage() {
           <form className="form-grid" onSubmit={submitMovement}>
             <div className="form-row">
               <label>Tipo</label>
-              <select
-                name="kind"
-                value={movementForm.kind}
-                onChange={handleMovementChange}
-              >
+              <select name="kind" value={movementForm.kind} onChange={handleMovementChange}>
                 <option value="INGRESO">Ingreso</option>
                 <option value="GASTO">Gasto</option>
               </select>
@@ -249,12 +255,7 @@ function RegisterPage() {
 
             <div className="form-row">
               <label>Fecha</label>
-              <input
-                type="date"
-                name="date"
-                value={movementForm.date}
-                onChange={handleMovementChange}
-              />
+              <input type="date" name="date" value={movementForm.date} onChange={handleMovementChange} />
             </div>
 
             <div className="form-row">
@@ -264,33 +265,30 @@ function RegisterPage() {
                 name="description"
                 value={movementForm.description}
                 onChange={handleMovementChange}
-                placeholder="Ej. Sueldo, alquiler, compra, etc."
+                placeholder="Ej. Sueldo, alquiler, compra..."
               />
             </div>
 
             <div className="form-row">
               <label>Estado</label>
-              <select
-                name="status"
-                value={movementForm.status}
-                onChange={handleMovementChange}
-              >
+              <select name="status" value={movementForm.status} onChange={handleMovementChange}>
                 <option value="REAL">Real</option>
                 <option value="PLANIFICADO">Planificado</option>
               </select>
             </div>
 
+            <div className="form-row" style={{ alignItems: 'center' }}>
+              <label>Es estimado (supuesto / proyección)</label>
+              <input type="checkbox" name="estimated" checked={movementForm.estimated} onChange={handleMovementChange} />
+            </div>
+
             <div className="form-row">
               <label>Objetivo asociado (opcional)</label>
-              <select
-                name="objectiveId"
-                value={movementForm.objectiveId}
-                onChange={handleMovementChange}
-              >
+              <select name="objectiveId" value={movementForm.objectiveId} onChange={handleMovementChange}>
                 <option value="">Ninguno</option>
                 {objectives.map((obj) => (
                   <option key={obj.id} value={obj.id}>
-                    {obj.name}
+                    {obj.title ?? obj.name}
                   </option>
                 ))}
               </select>
@@ -298,15 +296,11 @@ function RegisterPage() {
 
             <div className="form-row">
               <label>Actividad asociada (opcional)</label>
-              <select
-                name="activityId"
-                value={movementForm.activityId}
-                onChange={handleMovementChange}
-              >
+              <select name="activityId" value={movementForm.activityId} onChange={handleMovementChange}>
                 <option value="">Ninguna</option>
-                {activities.map((act) => (
-                  <option key={act.id} value={act.id}>
-                    {act.name} ({act.date})
+                {tasks.map((task) => (
+                  <option key={task.id} value={task.id}>
+                    {task.title ?? task.name} ({task.dueDate ?? task.date ?? 'sin fecha'})
                   </option>
                 ))}
               </select>
@@ -336,11 +330,7 @@ function RegisterPage() {
 
             <div className="form-row">
               <label>Área</label>
-              <select
-                name="area"
-                value={objectiveForm.area}
-                onChange={handleObjectiveChange}
-              >
+              <select name="area" value={objectiveForm.area} onChange={handleObjectiveChange}>
                 <option value="FINANZAS">Finanzas</option>
                 <option value="SALUD">Salud</option>
                 <option value="PERSONAL">Personal</option>
@@ -355,21 +345,12 @@ function RegisterPage() {
 
             <div className="form-row full">
               <label>Descripción</label>
-              <textarea
-                name="description"
-                value={objectiveForm.description}
-                onChange={handleObjectiveChange}
-                rows={3}
-              />
+              <textarea name="description" value={objectiveForm.description} onChange={handleObjectiveChange} rows={3} />
             </div>
 
             <div className="form-row">
               <label>Prioridad</label>
-              <select
-                name="priorityLevel"
-                value={objectiveForm.priorityLevel}
-                onChange={handleObjectiveChange}
-              >
+              <select name="priorityLevel" value={objectiveForm.priorityLevel} onChange={handleObjectiveChange}>
                 <option value="BAJA">Baja</option>
                 <option value="MEDIA">Media</option>
                 <option value="ALTA">Alta</option>
@@ -379,11 +360,7 @@ function RegisterPage() {
 
             <div className="form-row">
               <label>Tipo</label>
-              <select
-                name="type"
-                value={objectiveForm.type}
-                onChange={handleObjectiveChange}
-              >
+              <select name="type" value={objectiveForm.type} onChange={handleObjectiveChange}>
                 <option value="FINANCIERO">Financiero</option>
                 <option value="HABITO">Hábito / Acción</option>
                 <option value="MIXTO">Mixto</option>
@@ -392,11 +369,7 @@ function RegisterPage() {
 
             <div className="form-row">
               <label>Estado</label>
-              <select
-                name="status"
-                value={objectiveForm.status}
-                onChange={handleObjectiveChange}
-              >
+              <select name="status" value={objectiveForm.status} onChange={handleObjectiveChange}>
                 <option value="ACTIVO">Activo</option>
                 <option value="PAUSADO">Pausado</option>
                 <option value="LOGRADO">Logrado</option>
@@ -406,62 +379,32 @@ function RegisterPage() {
 
             <div className="form-row">
               <label>Fecha inicio</label>
-              <input
-                type="date"
-                name="startDate"
-                value={objectiveForm.startDate}
-                onChange={handleObjectiveChange}
-              />
+              <input type="date" name="startDate" value={objectiveForm.startDate} onChange={handleObjectiveChange} />
             </div>
 
             <div className="form-row">
               <label>Fecha fin</label>
-              <input
-                type="date"
-                name="endDate"
-                value={objectiveForm.endDate}
-                onChange={handleObjectiveChange}
-              />
+              <input type="date" name="endDate" value={objectiveForm.endDate} onChange={handleObjectiveChange} />
             </div>
 
-            {(objectiveForm.type === 'FINANCIERO' ||
-              objectiveForm.type === 'MIXTO') && (
+            {(objectiveForm.type === 'FINANCIERO' || objectiveForm.type === 'MIXTO') && (
               <>
                 <div className="form-row">
                   <label>Meta financiera</label>
-                  <input
-                    type="number"
-                    name="targetValue"
-                    value={objectiveForm.targetValue}
-                    onChange={handleObjectiveChange}
-                    min="0"
-                    step="0.01"
-                  />
+                  <input type="number" name="targetValue" value={objectiveForm.targetValue} onChange={handleObjectiveChange} min="0" step="0.01" />
                 </div>
                 <div className="form-row">
                   <label>Valor actual</label>
-                  <input
-                    type="number"
-                    name="currentValue"
-                    value={objectiveForm.currentValue}
-                    onChange={handleObjectiveChange}
-                    min="0"
-                    step="0.01"
-                  />
+                  <input type="number" name="currentValue" value={objectiveForm.currentValue} onChange={handleObjectiveChange} min="0" step="0.01" />
                 </div>
               </>
             )}
 
-            {(objectiveForm.type === 'HABITO' ||
-              objectiveForm.type === 'MIXTO') && (
+            {(objectiveForm.type === 'HABITO' || objectiveForm.type === 'MIXTO') && (
               <>
                 <div className="form-row">
                   <label>Frecuencia</label>
-                  <select
-                    name="frequency"
-                    value={objectiveForm.frequency}
-                    onChange={handleObjectiveChange}
-                  >
+                  <select name="frequency" value={objectiveForm.frequency} onChange={handleObjectiveChange}>
                     <option value="NINGUNA">Sin definir</option>
                     <option value="DIARIA">Diaria</option>
                     <option value="SEMANAL">Semanal</option>
@@ -470,13 +413,7 @@ function RegisterPage() {
                 </div>
                 <div className="form-row">
                   <label>Veces por período</label>
-                  <input
-                    type="number"
-                    name="timesPerPeriod"
-                    value={objectiveForm.timesPerPeriod}
-                    onChange={handleObjectiveChange}
-                    min="0"
-                  />
+                  <input type="number" name="timesPerPeriod" value={objectiveForm.timesPerPeriod} onChange={handleObjectiveChange} min="0" />
                 </div>
               </>
             )}
@@ -494,32 +431,17 @@ function RegisterPage() {
           <form className="form-grid" onSubmit={submitActivity}>
             <div className="form-row">
               <label>Nombre</label>
-              <input
-                type="text"
-                name="name"
-                value={activityForm.name}
-                onChange={handleActivityChange}
-                placeholder="Ej. Registrar gastos del día"
-              />
+              <input type="text" name="name" value={activityForm.name} onChange={handleActivityChange} placeholder="Ej. Registrar gastos del día" />
             </div>
 
             <div className="form-row">
               <label>Fecha</label>
-              <input
-                type="date"
-                name="date"
-                value={activityForm.date}
-                onChange={handleActivityChange}
-              />
+              <input type="date" name="date" value={activityForm.date} onChange={handleActivityChange} />
             </div>
 
             <div className="form-row">
               <label>Tipo</label>
-              <select
-                name="type"
-                value={activityForm.type}
-                onChange={handleActivityChange}
-              >
+              <select name="type" value={activityForm.type} onChange={handleActivityChange}>
                 <option value="FINANCIERA">Financiera</option>
                 <option value="PERSONAL">Personal</option>
                 <option value="TRABAJO">Trabajo</option>
@@ -532,11 +454,7 @@ function RegisterPage() {
 
             <div className="form-row">
               <label>Estado</label>
-              <select
-                name="status"
-                value={activityForm.status}
-                onChange={handleActivityChange}
-              >
+              <select name="status" value={activityForm.status} onChange={handleActivityChange}>
                 <option value="PENDIENTE">Pendiente</option>
                 <option value="HECHA">Hecha</option>
               </select>
@@ -544,15 +462,11 @@ function RegisterPage() {
 
             <div className="form-row">
               <label>Objetivo asociado (opcional)</label>
-              <select
-                name="objectiveId"
-                value={activityForm.objectiveId}
-                onChange={handleActivityChange}
-              >
+              <select name="objectiveId" value={activityForm.objectiveId} onChange={handleActivityChange}>
                 <option value="">Ninguno</option>
                 {objectives.map((obj) => (
                   <option key={obj.id} value={obj.id}>
-                    {obj.name}
+                    {obj.title ?? obj.name}
                   </option>
                 ))}
               </select>
@@ -560,12 +474,7 @@ function RegisterPage() {
 
             <div className="form-row full">
               <label>Descripción</label>
-              <textarea
-                name="description"
-                value={activityForm.description}
-                onChange={handleActivityChange}
-                rows={3}
-              />
+              <textarea name="description" value={activityForm.description} onChange={handleActivityChange} rows={3} />
             </div>
 
             <div className="form-actions">
